@@ -25,7 +25,7 @@ public class ClientNetworkHandler extends ChannelInboundHandlerAdapter {
             System.out.println("ClientNetworkHandler: Сообщение со списком файлом отправлено на вьюшку");
             System.out.println(listMessage.getListFiles().toString());
             clientNetworkListHandler.onServerListFiles(listMessage);
-        }//todo как передать на фрейм
+        }
     }
 
     @Override

@@ -9,11 +9,17 @@ import java.util.stream.Collectors;
 public class ListMessage extends Message {
 
     private List<String> listFiles;
+    private State state;
 
-    public ListMessage() {
+    public ListMessage(State state) {
+        super(state);
+        this.state = state;
+
     }
 
-    public ListMessage(Path path) throws IOException {
+    public ListMessage(State state, Path path) throws IOException {
+        super(state);
+        this.state = state;
 
         listFiles = Files.list(path)
                 .map(p -> {

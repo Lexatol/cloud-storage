@@ -31,7 +31,7 @@ public class FileHandler extends ChannelInboundHandlerAdapter {
         System.out.println("Читаю входящие сообщения");
         if (msg instanceof ListRequest) {
             System.out.println("отправляю список файлов с сервера");
-            ctx.writeAndFlush(new ListMessage(serverPath));
+            ctx.writeAndFlush(new ListMessage(ru.lexp00.storage.cloud.network.common.State.SEND_LIST_FILES, serverPath));
         }
 
 //        ByteBuf buf = ((ByteBuf) msg);

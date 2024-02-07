@@ -1,13 +1,9 @@
 package ru.lexp00.storage.cloud.client.gui;
 
 import ru.lexp00.storage.cloud.client.network.ClientListener;
-import ru.lexp00.storage.cloud.client.network.StorageClientNetwork;
 import ru.lexp00.storage.cloud.network.client.ClientNetwork;
 import ru.lexp00.storage.cloud.network.client.ClientNetworkListHandler;
-import ru.lexp00.storage.cloud.network.common.ListMessage;
-import ru.lexp00.storage.cloud.network.common.ListRequest;
-import ru.lexp00.storage.cloud.network.common.Message;
-import ru.lexp00.storage.cloud.network.common.State;
+import ru.lexp00.storage.cloud.network.common.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,9 +12,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 
-public class ClientGUI extends JFrame implements ClientNetworkListHandler, ClientListener, Thread.UncaughtExceptionHandler, ActionListener {
+public class ClientGUI extends JFrame implements ClientGUIListener, ClientNetworkListHandler, ClientListener, Thread.UncaughtExceptionHandler, ActionListener {
     private final int POS_X = 30;
     private final int POS_Y = 30;
     private final int WITH = 800;
@@ -54,10 +49,10 @@ public class ClientGUI extends JFrame implements ClientNetworkListHandler, Clien
 
 
     private final String CLIENTFILEDIR = "ClientFiles";
-    private final Path clientPath = Paths.get("./cloud-client", CLIENTFILEDIR);
+    private final String DIR = "./cloud-client";
+    private final Path clientPath = Paths.get(DIR, CLIENTFILEDIR);
 
     private ClientNetwork clientNetwork;
-
 
     public ClientGUI() {
         initFrame();
@@ -133,24 +128,17 @@ public class ClientGUI extends JFrame implements ClientNetworkListHandler, Clien
         Object event = e.getSource();
         if (event == menuFileItemExit) {
             dispose();
-            System.out.println("Программа завершена");
         } else if (event == menuFileItemAddCloud) {
             new FrameAddServer(this, this);
         } else if (event == btnCreateServerFolder) {
-            clientNetwork.sendMessage(new ListRequest());
-            //todo отправлять сообщение с запросом на создание папки
-//            Message msg;
-//            send(msg);
-        } else {
+            new FrameAddFolder(this, StateFolder.SERVER_FOLDER);
+        } else if (event == btnCreateLocalFolder) {
+            new FrameAddFolder(this, StateFolder.LOCAL_FOLDER);
+        }
+        else {
             throw new RuntimeException("Обработай событие, ты про него забыл");
         }
-
     }
-
-
-//    private void updateServerFiles(String[] listFiles) {
-//        updateListFiles(fileListServer, listFiles);
-//    }
 
     private void updateClientFiles() throws IOException {
         String[] listFiles = Files.list(clientPath)
@@ -184,16 +172,31 @@ public class ClientGUI extends JFrame implements ClientNetworkListHandler, Clien
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        send(new ListRequest());
+        send(new ListRequest(State.SEND_LIST_REQUEST));
     }
 
     @Override
     public void onServerListFiles(ListMessage listMessage) {
-        List<String> list = listMessage.getListFiles();
-
-        String [] listFiles = list.toArray(String[]::new);
+        String [] listFiles = listMessage.getListFiles().toArray(String[]::new);
         updateListFiles(fileListServer, listFiles);
     }
+
+    @Override
+    public void addFolderPath(String newTitleDir, StateFolder stateFolder) {
+        if (stateFolder.equals(StateFolder.SERVER_FOLDER)) {
+            send(new DirMessage(State.SEND_ADD_FOLDER_SERVER, newTitleDir));
+        } else if (stateFolder.equals(StateFolder.LOCAL_FOLDER)) {
+            Path path = Paths.get(DIR, CLIENTFILEDIR, newTitleDir);
+            try {
+                Files.createDirectory(path);
+                updateClientFiles();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+
 
 //
 //    private void processServerMessage(Message message) throws IOException {

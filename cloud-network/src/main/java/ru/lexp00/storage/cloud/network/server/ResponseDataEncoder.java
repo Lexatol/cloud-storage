@@ -15,7 +15,8 @@ public class ResponseDataEncoder
     protected void encode(ChannelHandlerContext ctx,
                           Message msg, ByteBuf out) throws Exception {
         System.out.println("В ResponseDataEncoder Сервера прилетело сообщение");
-
+        int state = msg.getState().getTitle();
+        out.writeInt(state);
        if (msg instanceof ListMessage) {
            ListMessage message = (ListMessage) msg;
            int sizeListMessage = message.getListFiles().size();

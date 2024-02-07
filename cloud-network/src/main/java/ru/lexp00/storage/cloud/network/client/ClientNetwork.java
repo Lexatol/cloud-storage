@@ -49,7 +49,7 @@ public class ClientNetwork extends Thread {
             });
 
             channelFuture = b.connect(host, port).sync();
-            System.out.println("Client started");
+            System.out.println("Listener: Client started");
 
             channelFuture.channel().closeFuture().sync();
         } catch (InterruptedException e) {

@@ -2,18 +2,23 @@ package ru.lexp00.storage.cloud.network.server;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import org.w3c.dom.ls.LSException;
+import ru.lexp00.storage.cloud.network.common.DirMessage;
 import ru.lexp00.storage.cloud.network.common.ListMessage;
+import ru.lexp00.storage.cloud.network.common.ListRequest;
+import ru.lexp00.storage.cloud.network.common.State;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class ProcessingHandler extends ChannelInboundHandlerAdapter {
 
-    private final String serverDir = ".cloud-server";
+    private final String serverDir = "./cloud-server";
 
     private final String serverFiles = "ServerFiles";
-    private final Path serverPath = Paths.get("./cloud-server", serverFiles);
+    private final Path serverPath = Paths.get(serverDir, serverFiles);
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
@@ -22,23 +27,27 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws IOException {
-//        if (msg instanceof ListRequest) {
-        ListMessage listMessage = new ListMessage(serverPath);
-        ctx.writeAndFlush(listMessage);
-        System.out.println("Отправил список файлов в енкодер Сервера");
-//        }
+        System.out.println("В ProcessingHandler сервера прилетело сообщение " + msg.toString());
+        if (msg instanceof ListRequest) {
+            ListMessage listMessage = new ListMessage(State.SEND_LIST_FILES, serverPath);
+            ctx.writeAndFlush(listMessage);
+            System.out.println("Отправил список файлов в енкодер Сервера");
+        } else if (msg instanceof DirMessage) {
+            System.out.println("Прилетело сообщение из декодера о создании папки");
+            String dirTitle = ((DirMessage) msg).getDirTitle();
+            Path path = Paths.get(serverDir, serverFiles, dirTitle);
+            if (!Files.exists(path)) {
+                Files.createDirectory(path);
+                System.out.println("Создали папку");
+            } else {
+                System.out.println("Listener: папка с таким именем уже существует");
+            }
+            ListMessage listMessage = new ListMessage(State.SEND_LIST_FILES, serverPath);
+            ctx.writeAndFlush(listMessage);
+            System.out.println("Отправили сообщение со всем списком файлов на сервере");
+        }
     }
 
-
-    //
-//            ListMessage message = new ListMessage(State.FILE_LIST);
-//            int countFiles = in.readInt();//отправляю размер массива
-//            for (int i = 0; i <countFiles; i++) {//хожу по массиву заданное кол-во раз
-//                int strLenFiles = in.readInt();//забираю длину каждой строки
-//                message.getListFiles().add(in.readCharSequence(strLenFiles, charset).toString());//добавляю в новый пакет message
-//            }
-//            ListMessage list = (ListMessage) msg;
-//            ctx.writeAndFlush(list);
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         cause.printStackTrace();

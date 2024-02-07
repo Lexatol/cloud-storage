@@ -36,6 +36,10 @@ public class FrameAddServer extends JFrame implements ActionListener, Thread.Unc
     public FrameAddServer(ClientListener clientListener, ClientNetworkListHandler clientNetworkListHandler) {
         this.clientListener = clientListener;
         this.clientNetworkListHandler = clientNetworkListHandler;
+        initFrame();
+    }
+
+    private void initFrame() {
         setBounds(POS_X, POS_Y, WITH, HEIGHT);
         setResizable(false);
 
