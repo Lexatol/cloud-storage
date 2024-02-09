@@ -1,10 +1,9 @@
-package ru.lexp00.storage.cloud.client.gui;
+package ru.lexp00.storage.cloud.client.gui.frames;
 
-import ru.lexp00.storage.cloud.client.network.ClientListener;
+import ru.lexp00.storage.cloud.client.network.ClientNetworkListener;
 import ru.lexp00.storage.cloud.client.network.StorageClientNetwork;
 import ru.lexp00.storage.cloud.network.client.ClientNetwork;
 import ru.lexp00.storage.cloud.network.client.ClientNetworkListHandler;
-import ru.lexp00.storage.cloud.network.common.ListMessage;
 
 import javax.swing.*;
 import java.awt.*;
@@ -30,10 +29,10 @@ public class FrameAddServer extends JFrame implements ActionListener, Thread.Unc
 
     private ClientNetwork clientNetwork;
 
-    private ClientListener clientListener;
+    private ClientNetworkListener clientListener;
     private ClientNetworkListHandler clientNetworkListHandler;
 
-    public FrameAddServer(ClientListener clientListener, ClientNetworkListHandler clientNetworkListHandler) {
+    public FrameAddServer(ClientNetworkListener clientListener, ClientNetworkListHandler clientNetworkListHandler) {
         this.clientListener = clientListener;
         this.clientNetworkListHandler = clientNetworkListHandler;
         initFrame();

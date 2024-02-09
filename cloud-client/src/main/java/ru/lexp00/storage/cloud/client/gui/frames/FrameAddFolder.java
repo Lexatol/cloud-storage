@@ -1,4 +1,7 @@
-package ru.lexp00.storage.cloud.client.gui;
+package ru.lexp00.storage.cloud.client.gui.frames;
+
+import ru.lexp00.storage.cloud.client.core.ClientGUIListener;
+import ru.lexp00.storage.cloud.client.core.StatePlace;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,7 +16,6 @@ public class FrameAddFolder extends JFrame implements ActionListener, Thread.Unc
 
     private final ClientGUIListener clientGUIListener;
 
-
     private JPanel panelBottom = new JPanel(new GridLayout(3, 1));
 
     private JLabel labelCreateFolderServer = new JLabel("Input folder title: ");
@@ -21,11 +23,10 @@ public class FrameAddFolder extends JFrame implements ActionListener, Thread.Unc
 
     private JButton btnCreate = new JButton("Create Folder");
 
-    private final StateFolder state;
+    private final StatePlace state;
 
 
-
-    public FrameAddFolder(ClientGUIListener clientGUIListener, StateFolder state) {
+    public FrameAddFolder(ClientGUIListener clientGUIListener, StatePlace state) {
         initFrame();
         this.clientGUIListener = clientGUIListener;
         this.state = state;

@@ -1,24 +1,26 @@
 package ru.lexp00.storage.cloud.client.gui;
 
-import ru.lexp00.storage.cloud.client.network.ClientListener;
-import ru.lexp00.storage.cloud.network.client.ClientNetwork;
+import ru.lexp00.storage.cloud.client.core.ClientController;
+import ru.lexp00.storage.cloud.client.core.ClientGUIListener;
+import ru.lexp00.storage.cloud.client.core.StatePlace;
+import ru.lexp00.storage.cloud.client.gui.frames.FrameAddFolder;
+import ru.lexp00.storage.cloud.client.gui.frames.FrameAddServer;
+import ru.lexp00.storage.cloud.client.gui.frames.FrameRenameFile;
 import ru.lexp00.storage.cloud.network.client.ClientNetworkListHandler;
-import ru.lexp00.storage.cloud.network.common.*;
+import ru.lexp00.storage.cloud.network.common.ListMessage;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
-public class ClientGUI extends JFrame implements ClientGUIListener, ClientNetworkListHandler, ClientListener, Thread.UncaughtExceptionHandler, ActionListener {
+public class ClientGUI extends JFrame implements Thread.UncaughtExceptionHandler,
+        ActionListener, ClientNetworkListHandler, ClientGUIListener {
     private final int POS_X = 30;
     private final int POS_Y = 30;
     private final int WITH = 800;
     private final int HEIGHT = 600;
-    private final int WITHPANELFILE = (int) (WITH / 2 - 10);
+    private final int WITHPANELFILE = WITH / 2 - 10;
 
 
     private JPanel panelBottom = new JPanel(new BorderLayout());
@@ -48,20 +50,15 @@ public class ClientGUI extends JFrame implements ClientGUIListener, ClientNetwor
     private JButton btnServerDelete = new JButton("Server Delete");
 
 
-    private final String CLIENTFILEDIR = "ClientFiles";
-    private final String DIR = "./cloud-client";
-    private final Path clientPath = Paths.get(DIR, CLIENTFILEDIR);
+    private final ClientController clientController;
 
-    private ClientNetwork clientNetwork;
+    private final Path clientPath;
 
     public ClientGUI() {
         initFrame();
-        try {
-            updateClientFiles();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
+        clientController = new ClientController();
+        clientPath = clientController.getClientPath();
+        updateClientFiles();
     }
 
     private void initFrame() {
@@ -129,82 +126,47 @@ public class ClientGUI extends JFrame implements ClientGUIListener, ClientNetwor
         if (event == menuFileItemExit) {
             dispose();
         } else if (event == menuFileItemAddCloud) {
-            new FrameAddServer(this, this);
+            new FrameAddServer(clientController, this);
         } else if (event == btnCreateServerFolder) {
-            new FrameAddFolder(this, StateFolder.SERVER_FOLDER);
+            new FrameAddFolder(this, StatePlace.SERVER_FOLDER);
         } else if (event == btnCreateLocalFolder) {
-            new FrameAddFolder(this, StateFolder.LOCAL_FOLDER);
-        }
-        else {
+            new FrameAddFolder(this, StatePlace.LOCAL_FOLDER);
+        } else if (event == btnRenameLocalFile) {
+            String lastTitleFile = fileListClient.getSelectedValue();
+            new FrameRenameFile(lastTitleFile, this, StatePlace.LOCAL_FOLDER);
+        } else {
             throw new RuntimeException("Обработай событие, ты про него забыл");
         }
     }
 
-    private void updateClientFiles() throws IOException {
-        String[] listFiles = Files.list(clientPath)
-                .map(p -> {
-                    if (Files.isDirectory(p)) {
-                        return "[DIR] " + p.getFileName().toString();
-                    } else {
-                        return p.getFileName().toString();
-                    }
-                })
-                .sorted()
-                .toArray(String[]::new);
+    private void updateClientFiles() {
+        String[] listFiles = clientController.updateClientFiles();
         updateListFiles(fileListClient, listFiles);
     }
 
-    private void updateListFiles(JList<String> fileList, String[] listFiles) {
-        fileList.removeAll();
-        fileList.setListData(listFiles);
-    }
-
-    private void send(Message msg) {
-        clientNetwork.sendMessage(msg);
-    }
-
-
-    @Override
-    public void clientOnConnect(ClientNetwork clientNetwork) {
-        this.clientNetwork = clientNetwork;
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        send(new ListRequest(State.SEND_LIST_REQUEST));
+    private void updateListFiles(JList<String> fileList, String[] list) {
+        clientController.updateListFiles(fileList, list);
     }
 
     @Override
     public void onServerListFiles(ListMessage listMessage) {
-        String [] listFiles = listMessage.getListFiles().toArray(String[]::new);
+        String[] listFiles = listMessage.getListFiles().toArray(String[]::new);
         updateListFiles(fileListServer, listFiles);
     }
 
     @Override
-    public void addFolderPath(String newTitleDir, StateFolder stateFolder) {
-        if (stateFolder.equals(StateFolder.SERVER_FOLDER)) {
-            send(new DirMessage(State.SEND_ADD_FOLDER_SERVER, newTitleDir));
-        } else if (stateFolder.equals(StateFolder.LOCAL_FOLDER)) {
-            Path path = Paths.get(DIR, CLIENTFILEDIR, newTitleDir);
-            try {
-                Files.createDirectory(path);
-                updateClientFiles();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
+    public void addFolderPath(String newTitleDir, StatePlace stateFolder) {
+        clientController.addFolder(newTitleDir, stateFolder);
+        updateClientFiles();
+    }
+
+    @Override
+    public void onRenameFile(String lastTitleFile, String newTitleFile, StatePlace statePlace) {
+        clientController.renameFile(lastTitleFile, newTitleFile, statePlace);
+        updateClientFiles();
     }
 
 
-
-//
-//    private void processServerMessage(Message message) throws IOException {
-//        if(message instanceof ListMessage) {
-//            ListMessage listMessage = (ListMessage) message;
-//            String[] list = listMessage.getListFiles();
-//            updateServerFiles(list);
-//        }
 //        if (message instanceof FileMessage) {
 //        }
 //        }
@@ -225,11 +187,8 @@ public class ClientGUI extends JFrame implements ClientGUIListener, ClientNetwor
 //            if (file.isFinish()) {
 //                updateClientView();
 //            }
-//        } else if (message instanceof ListMessage) {
-//            ListMessage list = (ListMessage) message;
-//            updateServerView(list.getFiles());
-//        }
 }
+
 
 
 

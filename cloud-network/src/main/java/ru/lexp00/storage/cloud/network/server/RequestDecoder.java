@@ -65,7 +65,7 @@ public class RequestDecoder extends ReplayingDecoder<Message> {//inbound
             int dirTitleLengh = in.readInt();
             String dirTitle = in.readCharSequence(dirTitleLengh, charset).toString();
             System.out.println("Название папки");
-            DirMessage dir = new DirMessage(State.SEND_LIST_REQUEST, dirTitle);
+            DirMessage dir = new DirMessage(dirTitle, State.SEND_LIST_REQUEST);
             out.add(dir);
             System.out.println("Сообщение улетело в хендлер сервера");
         }

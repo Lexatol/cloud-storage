@@ -29,7 +29,7 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws IOException {
         System.out.println("В ProcessingHandler сервера прилетело сообщение " + msg.toString());
         if (msg instanceof ListRequest) {
-            ListMessage listMessage = new ListMessage(State.SEND_LIST_FILES, serverPath);
+            ListMessage listMessage = new ListMessage(serverPath, State.SEND_LIST_FILES);
             ctx.writeAndFlush(listMessage);
             System.out.println("Отправил список файлов в енкодер Сервера");
         } else if (msg instanceof DirMessage) {
@@ -42,7 +42,7 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter {
             } else {
                 System.out.println("Listener: папка с таким именем уже существует");
             }
-            ListMessage listMessage = new ListMessage(State.SEND_LIST_FILES, serverPath);
+            ListMessage listMessage = new ListMessage(serverPath, State.SEND_LIST_FILES);
             ctx.writeAndFlush(listMessage);
             System.out.println("Отправили сообщение со всем списком файлов на сервере");
         }

@@ -2,7 +2,7 @@ package ru.lexp00.storage.cloud.client.network;//package ru.lexp00.storage.cloud
 
 import ru.lexp00.storage.cloud.network.client.ClientNetwork;
 
-public interface ClientListener {
+public interface ClientNetworkListener {
 
     void clientOnConnect(ClientNetwork clientNetwork);
 }

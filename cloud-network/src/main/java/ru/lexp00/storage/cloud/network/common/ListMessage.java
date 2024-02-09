@@ -17,7 +17,7 @@ public class ListMessage extends Message {
 
     }
 
-    public ListMessage(State state, Path path) throws IOException {
+    public ListMessage(Path path, State state) throws IOException {
         super(state);
         this.state = state;
 
