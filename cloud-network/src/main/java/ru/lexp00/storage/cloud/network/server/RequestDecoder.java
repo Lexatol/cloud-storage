@@ -57,20 +57,35 @@ public class RequestDecoder extends ReplayingDecoder<Message> {//inbound
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
         int state = in.readInt();
+        System.out.println("State : " + state);
         if (state == 1) {
             ListRequest listRequest = new ListRequest(State.SEND_LIST_REQUEST);
             out.add(listRequest);
         } else if (state == 3) {
             System.out.println("От КЛИЕНТА прилетело сообщение на декодирование - создание папки");
-            int dirTitleLengh = in.readInt();
-            String dirTitle = in.readCharSequence(dirTitleLengh, charset).toString();
+            int dirTitleLength = in.readInt();
+            String dirTitle = in.readCharSequence(dirTitleLength, charset).toString();
             System.out.println("Название папки");
-            DirMessage dir = new DirMessage(dirTitle, State.SEND_LIST_REQUEST);
+            DirMessage dir = new DirMessage(dirTitle, State.SEND_ADD_FOLDER_SERVER);
             out.add(dir);
             System.out.println("Сообщение улетело в хендлер сервера");
+        } else if (state == 4) {
+            System.out.println("Пришло сообщение от КЛИЕНТА о переименовании папки на сервере");
+            int lasTitleFileLength = in.readInt();
+            String lastTitleFile = in.readCharSequence(lasTitleFileLength, charset).toString();
+            int newTitleFileLength = in.readInt();
+            String newTitleFile = in.readCharSequence(newTitleFileLength, charset).toString();
+            RenameMessage renameMessage = new RenameMessage(lastTitleFile, newTitleFile, State.SEND_RENAME_FOLDER_SERVER);
+            out.add(renameMessage);
+            System.out.println("декодер отправил раскодированное сообщение");
+        } else if (state == 5) {
+            System.out.println("Пришло сообщение от КЛИЕНТА об удалении файла с сервера");
+            int strTitleLength = in.readInt();
+            String strTitle = in.readCharSequence(strTitleLength, charset).toString();
+            DeleteMessage deleteMessage = new DeleteMessage(strTitle, State.SEND_DELETE_FILE);
+            out.add(deleteMessage);
+            System.out.println("Декодер отправил раскодированное сообщение");
         }
-//        String str = in.readCharSequence(count, Charset.defaultCharset()).toString();
-//        out.add(str);
     }
 }
 

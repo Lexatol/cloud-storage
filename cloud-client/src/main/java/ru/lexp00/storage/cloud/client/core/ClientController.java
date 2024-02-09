@@ -11,7 +11,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
-public class ClientController implements ClientNetworkListener  {
+public class ClientController implements ClientNetworkListener {
 
     private final String CLIENTFILEDIR = "ClientFiles";
     private final String DIR = "./cloud-client";
@@ -48,8 +48,7 @@ public class ClientController implements ClientNetworkListener  {
                 throw new RuntimeException(e);
             }
         } else if (statePlace.equals(StatePlace.SERVER_FOLDER)) {
-            send(new RenameMessage(lastTitleFile, newTitleFile, State.SEND_ADD_FOLDER_SERVER));
-//todo написать отправку сообщения о переименовании папки на сервере
+            send(new RenameMessage(lastTitleFile, newTitleFile, State.SEND_RENAME_FOLDER_SERVER));
         }
     }
 
@@ -95,5 +94,20 @@ public class ClientController implements ClientNetworkListener  {
 
     public Path getClientPath() {
         return clientPath;
+    }
+
+    public void deleteFile(String strTitle, StatePlace statePlace) throws IOException {
+        Path path;
+        if (strTitle.contains("[DIR]")) {
+            String[] str = strTitle.split(" ");
+            path = Paths.get(DIR, CLIENTFILEDIR, str[1]);
+        } else {
+            path = Paths.get(DIR, CLIENTFILEDIR, strTitle);
+        }
+        if (statePlace.equals(StatePlace.LOCAL_FOLDER)) {
+            Files.delete(path);
+        } else if(statePlace.equals(StatePlace.SERVER_FOLDER)) {
+            send(new DeleteMessage(strTitle, State.SEND_DELETE_FILE));
+        }
     }
 }

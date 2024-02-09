@@ -54,7 +54,7 @@ public class FrameAddFolder extends JFrame implements ActionListener, Thread.Unc
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        clientGUIListener.addFolderPath(txtFolderTitle.getText(), state);
+        clientGUIListener.onAddFolder(txtFolderTitle.getText(), state);
         dispose();
     }
 }

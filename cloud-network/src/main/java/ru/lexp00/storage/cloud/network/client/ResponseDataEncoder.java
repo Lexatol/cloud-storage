@@ -24,11 +24,32 @@ public class ResponseDataEncoder
             System.out.println("В ResponseDataEncoder клиента прилетело сообщение на кодирование: " + msg.getClass().getCanonicalName());
             System.out.println("Сообщение отправлено на сервер в Декодер сервера " + State.SEND_LIST_REQUEST);
         } else if(msg instanceof DirMessage) {
-            System.out.println("В ResponseDataEncoder клиента прилетело сообщение на кодирование: " + msg.getClass().getCanonicalName());
+            System.out.println("В ResponseDataEncoder клиента пришло сообщение на кодирование: " + msg.getClass().getCanonicalName());
             String dirTitle = ((DirMessage) msg).getDirTitle();
             out.writeInt(dirTitle.length());
             out.writeCharSequence(dirTitle, charset);
             System.out.println("сообщение о создании папки улетело на сервер");
+        } else if (msg instanceof RenameMessage) {
+            System.out.println("В ResponseDataEncoder клиента пришло сообщение на кодирование: " + msg.getClass().getCanonicalName());
+            RenameMessage renameMessage = (RenameMessage) msg;
+            String lasTitleFile = renameMessage.getLastTitleFile();
+            String newTitleFile = renameMessage.getNewTitleFile();
+            int lasTitleFileLength = lasTitleFile.length();
+            int newTitleFileLength = newTitleFile.length();
+            out.writeInt(lasTitleFileLength);
+            out.writeCharSequence(lasTitleFile, charset);
+            out.writeInt(newTitleFileLength);
+            out.writeCharSequence(newTitleFile, charset);
+            System.out.println("Отправлено сообщение с переименование папки на сервере");
+        }else if(msg instanceof DeleteMessage) {
+            System.out.println("В ResponseDataEncoder клиента пришло сообщение на кодирование: " + msg.getClass().getCanonicalName());
+            DeleteMessage deleteMessage = (DeleteMessage) msg;
+            String strFile = deleteMessage.getStrTitle();
+            int strFileLength = strFile.length();
+            out.writeInt(strFileLength);
+            out.writeCharSequence(strFile, charset);
+            System.out.println("Отправлено сообщение с удаление файла на сервере");
+
         }
     }
 }

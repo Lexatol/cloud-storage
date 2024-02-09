@@ -12,6 +12,7 @@ import ru.lexp00.storage.cloud.network.common.ListMessage;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 import java.nio.file.Path;
 
 public class ClientGUI extends JFrame implements Thread.UncaughtExceptionHandler,
@@ -134,9 +135,22 @@ public class ClientGUI extends JFrame implements Thread.UncaughtExceptionHandler
         } else if (event == btnRenameLocalFile) {
             String lastTitleFile = fileListClient.getSelectedValue();
             new FrameRenameFile(lastTitleFile, this, StatePlace.LOCAL_FOLDER);
-        } else {
+        } else if (event == btnRenameServerFile) {
+            String lastTitleFile = fileListServer.getSelectedValue();
+            new FrameRenameFile(lastTitleFile, this, StatePlace.SERVER_FOLDER);
+        } else if (event == btnLocalDelete) {
+            String strTitle = fileListClient.getSelectedValue();
+            onDeleteFile(strTitle, StatePlace.LOCAL_FOLDER);
+            updateClientFiles();
+        } else if (event == btnServerDelete) {
+            String strTile = fileListServer.getSelectedValue();
+            onDeleteFile(strTile, StatePlace.SERVER_FOLDER);
+            updateClientFiles();
+        }
+        else {
             throw new RuntimeException("Обработай событие, ты про него забыл");
         }
+
     }
 
     private void updateClientFiles() {
@@ -155,7 +169,7 @@ public class ClientGUI extends JFrame implements Thread.UncaughtExceptionHandler
     }
 
     @Override
-    public void addFolderPath(String newTitleDir, StatePlace stateFolder) {
+    public void onAddFolder(String newTitleDir, StatePlace stateFolder) {
         clientController.addFolder(newTitleDir, stateFolder);
         updateClientFiles();
     }
@@ -164,6 +178,15 @@ public class ClientGUI extends JFrame implements Thread.UncaughtExceptionHandler
     public void onRenameFile(String lastTitleFile, String newTitleFile, StatePlace statePlace) {
         clientController.renameFile(lastTitleFile, newTitleFile, statePlace);
         updateClientFiles();
+    }
+
+    @Override
+    public void onDeleteFile(String strTitle, StatePlace statePlace) {
+        try {
+            clientController.deleteFile(strTitle, statePlace);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 

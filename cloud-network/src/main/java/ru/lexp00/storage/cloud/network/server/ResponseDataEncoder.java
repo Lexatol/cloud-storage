@@ -14,7 +14,7 @@ public class ResponseDataEncoder
     @Override
     protected void encode(ChannelHandlerContext ctx,
                           Message msg, ByteBuf out) throws Exception {
-        System.out.println("В ResponseDataEncoder Сервера прилетело сообщение");
+        System.out.println("ResponseDataEncoder: Пришло сообщение в Сервер для кодирования и последующей отправки в сеть");
         int state = msg.getState().getTitle();
         out.writeInt(state);
        if (msg instanceof ListMessage) {
@@ -26,7 +26,9 @@ public class ResponseDataEncoder
                out.writeInt(str.length());
                out.writeCharSequence(str, Charset.defaultCharset());
            }
-           System.out.println("Сервер Отправил сообщение в сеть для получения клиентом с сообщением " + message.getListFiles().toString());
+           System.out.println("Сервер Отправил сообщение в сеть сообщение типа " + message.getListFiles().toString());
+       } else {
+           System.out.println("Не известный тип сообщения");
        }
     }
 
