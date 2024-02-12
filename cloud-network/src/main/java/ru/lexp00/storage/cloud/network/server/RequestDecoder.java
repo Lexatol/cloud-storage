@@ -11,42 +11,24 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.function.IntFunction;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class RequestDecoder extends ReplayingDecoder<Message> {//inbound
 
     private Charset charset = StandardCharsets.UTF_8;
+    private final String serverDir = "./cloud-server";
+
+    private final String serverFiles = "ServerFiles";
+    private final Path serverPath = Paths.get(serverDir, serverFiles);
+
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         System.out.println("Установлено соединение в RequestDecoder");
     }
-//        @Override
-//    protected void decode(ChannelHandlerContext ctx, Message msg, List<Object> out) throws Exception {
-//            System.out.println("Попали в decode");
-//        if (msg.getState().equals(State.SEND_LIST_REQUEST)) {
-//            System.out.println("Сверяем это у нас запрос на список файлов или нет");
-//            ListRequest listRequest = (ListRequest) msg;
-//            out.add(listRequest);
-//        }
-//        System.out.println("В декодер Сервера прилетело сообщение " + msg.getClass().getCanonicalName());
-//        if (msg instanceof ListRequest) {
-//            ListRequest listRequest = (ListRequest) msg;
-//            System.out.println(listRequest.getClass().getCanonicalName());
-//        }
-//        out.add(msg);
-//    }
-
-//    @Override
-//    protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-//        System.out.println("В декодер Сервера прилетело сообщение " );
-//        System.out.println(in.toString());
-//        out.add(in.toString());
-
-//        if (msg instanceof ListRequest) {
-//            ListRequest listRequest = (ListRequest) msg;
-//            System.out.println(listRequest.getClass().getCanonicalName());
-//        }
-//    }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
@@ -85,6 +67,20 @@ public class RequestDecoder extends ReplayingDecoder<Message> {//inbound
             DeleteMessage deleteMessage = new DeleteMessage(strTitle, State.SEND_DELETE_FILE);
             out.add(deleteMessage);
             System.out.println("Декодер отправил раскодированное сообщение");
+        } else if (state == 6) {
+            System.out.println("Пришло сообщение от КЛИЕНТА c файлом");
+            int fileTitleLength = in.readInt();
+            String fileTitle = in.readCharSequence(fileTitleLength, charset).toString();
+            System.out.println("Server Decoder: пришло название файла" + fileTitle);
+            int listStringLength = in.readInt();
+            byte[] data = new byte[listStringLength];
+            for (int i = 0; i < listStringLength; i++) {
+                data[i] = in.readByte();
+            }
+            FileMessage fileMessage = new FileMessage(State.SEND_FILE);
+            fileMessage.setFileTitle(fileTitle);
+            fileMessage.setData(data);
+            out.add(fileMessage);
         }
     }
 }

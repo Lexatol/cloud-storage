@@ -5,11 +5,10 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.w3c.dom.ls.LSException;
 import ru.lexp00.storage.cloud.network.common.*;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
 
 public class ProcessingHandler extends ChannelInboundHandlerAdapter {
 
@@ -71,7 +70,7 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter {
                 }
             }
             sendMessageWithListFilesOnServer(ctx);
-        } else if(msg instanceof DeleteMessage) {
+        } else if (msg instanceof DeleteMessage) {
             System.out.println("Пришло сообщение из декодера с задачей об удалении файла на сервере");
             DeleteMessage deleteMessage = (DeleteMessage) msg;
             String strFile = deleteMessage.getStrTitle();
@@ -84,6 +83,23 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter {
             }
             Files.delete(path);
             sendMessageWithListFilesOnServer(ctx);
+        } else if (msg instanceof FileMessage) {
+            System.out.println("Пришло сообщение с файлом из декодера");
+            FileMessage fileMessage = (FileMessage) msg;
+            String strTitle = fileMessage.getFileTitle();
+
+            Path path;
+            if (!strTitle.contains("[DIR]")) {
+                path = Paths.get(serverDir, serverFiles, strTitle);
+                Files.write(path, fileMessage.getData());
+            } else {
+                String[] str = strTitle.split(" ");
+                path = Paths.get(serverDir, serverFiles, str[1]);
+                Files.createDirectory(path);
+            }
+            sendMessageWithListFilesOnServer(ctx);
+
+
         }
 
     }

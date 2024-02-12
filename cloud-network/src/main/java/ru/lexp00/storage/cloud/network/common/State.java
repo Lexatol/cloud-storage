@@ -5,7 +5,8 @@ public enum State {
     SEND_LIST_FILES(2),
     SEND_ADD_FOLDER_SERVER(3),
     SEND_RENAME_FOLDER_SERVER(4),
-    SEND_DELETE_FILE(5);
+    SEND_DELETE_FILE(5),
+    SEND_FILE(6);
 
     private final int title;
 

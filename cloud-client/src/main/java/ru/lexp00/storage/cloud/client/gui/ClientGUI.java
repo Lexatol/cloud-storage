@@ -146,6 +146,11 @@ public class ClientGUI extends JFrame implements Thread.UncaughtExceptionHandler
             String strTile = fileListServer.getSelectedValue();
             onDeleteFile(strTile, StatePlace.SERVER_FOLDER);
             updateClientFiles();
+        } else if (event == btnUploadToServer) {
+            //todo реализовать загрузку на сервер файла
+            String strFile = fileListClient.getSelectedValue();
+            System.out.println(strFile);
+            onSendFileOnServer(strFile);
         }
         else {
             throw new RuntimeException("Обработай событие, ты про него забыл");
@@ -172,21 +177,30 @@ public class ClientGUI extends JFrame implements Thread.UncaughtExceptionHandler
     public void onAddFolder(String newTitleDir, StatePlace stateFolder) {
         clientController.addFolder(newTitleDir, stateFolder);
         updateClientFiles();
+        JOptionPane.showMessageDialog(null, "Add folder " + newTitleDir);
+
     }
 
     @Override
     public void onRenameFile(String lastTitleFile, String newTitleFile, StatePlace statePlace) {
         clientController.renameFile(lastTitleFile, newTitleFile, statePlace);
         updateClientFiles();
+        JOptionPane.showMessageDialog(null, "File rename " + lastTitleFile);
     }
 
     @Override
     public void onDeleteFile(String strTitle, StatePlace statePlace) {
         try {
             clientController.deleteFile(strTitle, statePlace);
+            JOptionPane.showMessageDialog(null, "File delete " + strTitle);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public void onSendFileOnServer(String strFile) {
+        clientController.sendFileOnServer(strFile);
     }
 
 

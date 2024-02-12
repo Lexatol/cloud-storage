@@ -110,4 +110,14 @@ public class ClientController implements ClientNetworkListener {
             send(new DeleteMessage(strTitle, State.SEND_DELETE_FILE));
         }
     }
+
+
+    public void sendFileOnServer(String strFile) {
+        Path path = Paths.get(DIR, CLIENTFILEDIR, strFile);
+        try {
+            send(new FileMessage(path, State.SEND_FILE));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
