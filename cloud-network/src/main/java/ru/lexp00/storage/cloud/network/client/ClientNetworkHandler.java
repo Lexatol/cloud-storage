@@ -5,17 +5,10 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import ru.lexp00.storage.cloud.network.common.FileMessage;
 import ru.lexp00.storage.cloud.network.common.ListMessage;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 
 public class ClientNetworkHandler extends ChannelInboundHandlerAdapter {
 
-    private final String CLIENTFILEDIR = "ClientFiles";
-    private final String DIR = "./cloud-client";
-    private ClientNetworkListHandler clientNetworkListHandler;
+    private final ClientNetworkListHandler clientNetworkListHandler;
 
     public ClientNetworkHandler(ClientNetworkListHandler clientNetworkListHandler) {
         this.clientNetworkListHandler = clientNetworkListHandler;
@@ -29,15 +22,14 @@ public class ClientNetworkHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof ListMessage) {
-            System.out.println("ClientNetworkHandler: Сообщение со списком файлом отправлено на вьюшку");
             ListMessage listMessage = (ListMessage) msg;
-            System.out.println("ClientNetworkHandler: Сообщение со списком файлом отправлено на вьюшку");
             System.out.println(listMessage.getListFiles().toString());
             clientNetworkListHandler.onServerListFiles(listMessage);
         } else if (msg instanceof FileMessage) {
-            System.out.println("ClientNetworkHandler: Сообщение с файлом пришло с сервера");
             FileMessage fileMessage = (FileMessage) msg;
             clientNetworkListHandler.onDownloadFileOnLocal(fileMessage);
+        } else {
+            throw new RuntimeException("ClientNetworkHandler: Не известный тип сообщения " + msg.getClass().getCanonicalName());
         }
     }
 

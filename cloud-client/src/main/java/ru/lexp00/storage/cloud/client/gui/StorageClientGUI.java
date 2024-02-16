@@ -16,7 +16,7 @@ import java.awt.event.*;
 import java.io.IOException;
 import java.nio.file.Path;
 
-public class ClientGUI extends JFrame implements Thread.UncaughtExceptionHandler,
+public class StorageClientGUI extends JFrame implements Thread.UncaughtExceptionHandler,
         ActionListener, ClientNetworkListHandler, ClientGUIListener {
     private final int POS_X = 30;
     private final int POS_Y = 30;
@@ -56,7 +56,7 @@ public class ClientGUI extends JFrame implements Thread.UncaughtExceptionHandler
 
     private final Path clientPath;
 
-    public ClientGUI() {
+    public StorageClientGUI() {
         initFrame();
         clientController = new ClientController();
         clientPath = clientController.getClientPath();
@@ -179,7 +179,7 @@ public class ClientGUI extends JFrame implements Thread.UncaughtExceptionHandler
     public void onDownloadFileOnLocal(FileMessage fileMessage) {
         clientController.addFile(fileMessage);
         updateClientFiles();
-        JOptionPane.showMessageDialog(null,fileMessage.getFileTitle() + " Файл скачан");
+        JOptionPane.showMessageDialog(null,"File download " + fileMessage.getTitleFile());
 
     }
 
@@ -209,14 +209,14 @@ public class ClientGUI extends JFrame implements Thread.UncaughtExceptionHandler
     }
 
     @Override
-    public void fileUploadOnServer(String strFile) {
-        clientController.sendFileOnServer(strFile);
+    public void fileUploadOnServer(String titleFile) {
+        clientController.addFileOnServer(titleFile);
 
     }
 
     @Override
-    public void fileDownloadOnLocal(String strFile) {
-        clientController.sendFileOnLocal(strFile);
+    public void fileDownloadOnLocal(String titleFile) {
+        clientController.addFileOnLocal(titleFile);
         updateClientFiles();
     }
 }

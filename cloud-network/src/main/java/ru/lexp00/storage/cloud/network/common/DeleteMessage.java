@@ -3,12 +3,12 @@ package ru.lexp00.storage.cloud.network.common;
 public class DeleteMessage extends Message{
 
     private final State state;
-    private String strTitle;
+    private final String titleFile;
 
-    public DeleteMessage(String strTitle, State state) {
+    public DeleteMessage(String titleFile, State state) {
         super(state);
         this.state =state;
-        this.strTitle = strTitle;
+        this.titleFile = titleFile;
     }
 
     @Override
@@ -16,7 +16,7 @@ public class DeleteMessage extends Message{
         return state;
     }
 
-    public String getStrTitle() {
-        return strTitle;
+    public String getTitleFile() {
+        return titleFile;
     }
 }

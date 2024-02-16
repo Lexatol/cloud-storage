@@ -1,17 +1,14 @@
 package ru.lexp00.storage.cloud.network.common;
 
 public class DirMessage extends Message{
-    private String dirTitle;
-    public DirMessage(String dirTitle, State state) {
+    private String titleDir;
+    public DirMessage(String titleDir, State state) {
         super(state);
-        this.dirTitle = dirTitle;
+        this.titleDir = titleDir;
     }
 
-    public String getDirTitle() {
-        return dirTitle;
+    public String getTitleDir() {
+        return titleDir;
     }
 
-    public void setDirTitle(String dirTitle) {
-        this.dirTitle = dirTitle;
-    }
 }

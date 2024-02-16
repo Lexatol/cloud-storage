@@ -7,4 +7,6 @@ public interface ClientNetworkListHandler  {
     void onServerListFiles(ListMessage listMessage);
     void onDownloadFileOnLocal(FileMessage fileMessage);
 
+
+
 }

@@ -1,4 +1,4 @@
-package ru.lexp00.storage.cloud.client.network;//package ru.lexp00.storage.cloud.network;
+package ru.lexp00.storage.cloud.client.network;
 
 import ru.lexp00.storage.cloud.network.client.ClientNetwork;
 

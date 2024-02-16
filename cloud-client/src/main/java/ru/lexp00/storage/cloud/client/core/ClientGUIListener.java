@@ -5,8 +5,8 @@ public interface ClientGUIListener {
     void onAddFolder(String newTitleDir, StatePlace stateFolder);
     void onRenameFile(String lastTitleFile, String newTitleFile, StatePlace statePlace);
     void onDeleteFile(String strTitle, StatePlace statePlace);
-    void fileUploadOnServer(String strFile);
-    void fileDownloadOnLocal(String strFile);
+    void fileUploadOnServer(String titleFile);
+    void fileDownloadOnLocal(String titleFile);
 
 
 }

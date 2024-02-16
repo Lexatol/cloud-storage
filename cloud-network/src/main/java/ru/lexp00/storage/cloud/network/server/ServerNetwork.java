@@ -19,7 +19,6 @@ public class ServerNetwork {
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
             ServerBootstrap b = new ServerBootstrap();
-            System.out.println("Server started");
             b.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
                     .childHandler(new ChannelInitializer<SocketChannel>() {
@@ -44,7 +43,6 @@ public class ServerNetwork {
 
     public void stop() {
         if (channelFuture.channel().isActive()) {
-
             //todo сюда добавим пакет который отправим клиенту об отключении
             try {
                 channelFuture.await(1000);//а это нам надо чтобы пакет успел улететь, иначе закроем раньше канал чем нужно
@@ -54,7 +52,6 @@ public class ServerNetwork {
             }
             channelFuture.awaitUninterruptibly();
             channelFuture.addListener(ChannelFutureListener.CLOSE);
-            System.out.println("Server stopped");
         } else {
             System.out.println("Server is stopped");
         }

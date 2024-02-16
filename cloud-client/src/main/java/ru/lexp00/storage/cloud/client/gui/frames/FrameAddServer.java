@@ -58,8 +58,6 @@ public class FrameAddServer extends JFrame implements ActionListener, Thread.Unc
     @Override
     public void actionPerformed(ActionEvent e) {
         clientNetwork = new StorageClientNetwork(serverHost.getText(), Integer.parseInt(serverPort.getText()), clientNetworkListHandler);
-        System.out.println("Создали соединение и отправляем сообщение с запросом всех файлов с сервера");
-        System.out.println(clientNetwork.isAlive());
         clientListener.clientOnConnect(clientNetwork);
         dispose();
     }

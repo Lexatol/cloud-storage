@@ -13,9 +13,12 @@ import java.nio.file.StandardCopyOption;
 
 public class ClientController implements ClientNetworkListener {
 
-    private final String CLIENTFILEDIR = "ClientFiles";
-    private final String DIR = "./cloud-client";
-    private final Path clientPath = Paths.get(DIR, CLIENTFILEDIR);
+
+    private final String prefixDir = "[DIR]";
+    private final String splitDelimiter = " ";
+    private final String clientDir = "ClientFiles";
+    private final String dir = "./cloud-client";
+    private final Path clientPath = Paths.get(dir, clientDir);
 
     private ClientNetwork clientNetwork;
 
@@ -23,7 +26,7 @@ public class ClientController implements ClientNetworkListener {
         if (stateFolder.equals(StatePlace.SERVER_FOLDER)) {
             send(new DirMessage(newTitleDir, State.SEND_ADD_FOLDER_SERVER));
         } else if (stateFolder.equals(StatePlace.LOCAL_FOLDER)) {
-            Path path = Paths.get(DIR, CLIENTFILEDIR, newTitleDir);
+            Path path = Paths.get(dir, clientDir, newTitleDir);
             try {
                 Files.createDirectory(path);
             } catch (IOException e) {
@@ -33,12 +36,9 @@ public class ClientController implements ClientNetworkListener {
     }
 
     public void addFile(FileMessage fileMessage) {
-
-        FileMessage fl = fileMessage;
-        System.out.println("ClientController: пришло сообщение сохранить файл " + fl.getFileTitle());
-        Path path = Paths.get(DIR, CLIENTFILEDIR, fl.getFileTitle());
+        Path path = Paths.get(dir, clientDir, fileMessage.getTitleFile());
         try {
-            Files.write(path, fl.getData());
+            Files.write(path, fileMessage.getDataFile());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -46,12 +46,12 @@ public class ClientController implements ClientNetworkListener {
 
     public void renameFile(String lastTitleFile, String newTitleFile, StatePlace statePlace) {
         Path sourcePath;
-        Path destinationPath = Paths.get(DIR, CLIENTFILEDIR, newTitleFile);
-        if (!lastTitleFile.contains("[DIR]")) {
-            sourcePath = Paths.get(DIR, CLIENTFILEDIR, lastTitleFile);
+        Path destinationPath = Paths.get(dir, clientDir, newTitleFile);
+        if (!lastTitleFile.contains(prefixDir)) {
+            sourcePath = Paths.get(dir, clientDir, lastTitleFile);
         } else {
-            String[] strLasFile = lastTitleFile.split(" ");
-            sourcePath = Paths.get(DIR, CLIENTFILEDIR, strLasFile[1]);
+            String[] strLasFile = lastTitleFile.split(splitDelimiter);
+            sourcePath = Paths.get(dir, clientDir, strLasFile[1]);
         }
         if (statePlace.equals(StatePlace.LOCAL_FOLDER) && !Files.exists(destinationPath)) {
             try {
@@ -81,7 +81,7 @@ public class ClientController implements ClientNetworkListener {
             listFiles = Files.list(clientPath)
                     .map(p -> {
                         if (Files.isDirectory(p)) {
-                            return "[DIR] " + p.getFileName().toString();
+                            return prefixDir + splitDelimiter + p.getFileName().toString();
                         } else {
                             return p.getFileName().toString();
                         }
@@ -110,21 +110,21 @@ public class ClientController implements ClientNetworkListener {
 
     public void deleteFile(String strTitle, StatePlace statePlace) throws IOException {
         Path path;
-        if (strTitle.contains("[DIR]")) {
-            String[] str = strTitle.split(" ");
-            path = Paths.get(DIR, CLIENTFILEDIR, str[1]);
+        if (strTitle.contains(prefixDir)) {
+            String[] str = strTitle.split(splitDelimiter);
+            path = Paths.get(dir, clientDir, str[1]);
         } else {
-            path = Paths.get(DIR, CLIENTFILEDIR, strTitle);
+            path = Paths.get(dir, clientDir, strTitle);
         }
         if (statePlace.equals(StatePlace.LOCAL_FOLDER)) {
             Files.delete(path);
-        } else if(statePlace.equals(StatePlace.SERVER_FOLDER)) {
+        } else if (statePlace.equals(StatePlace.SERVER_FOLDER)) {
             send(new DeleteMessage(strTitle, State.SEND_DELETE_FILE));
         }
     }
 
-    public void sendFileOnServer(String strFile) {
-        Path path = Paths.get(DIR, CLIENTFILEDIR, strFile);
+    public void addFileOnServer(String strFile) {
+        Path path = Paths.get(dir, clientDir, strFile);
         try {
             send(new FileMessage(path, State.SEND_FILE));
         } catch (IOException e) {
@@ -132,8 +132,7 @@ public class ClientController implements ClientNetworkListener {
         }
     }
 
-    public void sendFileOnLocal(String strFile) {
+    public void addFileOnLocal(String strFile) {
         send(new FileRequest(strFile, State.SEND_FILE_REQUEST));
     }
-
 }

@@ -22,7 +22,6 @@ public class ClientNetwork extends Thread {
         this.clientNetworkListHandler = clientNetworkListHandler;
         this.host = host;
         this.port = port;
-        System.out.println("Constructor clientNetwork started");
         start();
     }
 
@@ -49,8 +48,6 @@ public class ClientNetwork extends Thread {
             });
 
             channelFuture = b.connect(host, port).sync();
-            System.out.println("Listener: Client started");
-
             channelFuture.channel().closeFuture().sync();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
@@ -66,7 +63,6 @@ public class ClientNetwork extends Thread {
     }
 
     public void sendMessage(Message msg) {
-        System.out.println("зашли в метод отправки сообщения");
         channelFuture.channel().writeAndFlush(msg);
     }
 }
