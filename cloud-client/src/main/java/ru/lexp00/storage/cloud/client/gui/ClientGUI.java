@@ -7,6 +7,7 @@ import ru.lexp00.storage.cloud.client.gui.frames.FrameAddFolder;
 import ru.lexp00.storage.cloud.client.gui.frames.FrameAddServer;
 import ru.lexp00.storage.cloud.client.gui.frames.FrameRenameFile;
 import ru.lexp00.storage.cloud.network.client.ClientNetworkListHandler;
+import ru.lexp00.storage.cloud.network.common.FileMessage;
 import ru.lexp00.storage.cloud.network.common.ListMessage;
 
 import javax.swing.*;
@@ -147,15 +148,16 @@ public class ClientGUI extends JFrame implements Thread.UncaughtExceptionHandler
             onDeleteFile(strTile, StatePlace.SERVER_FOLDER);
             updateClientFiles();
         } else if (event == btnUploadToServer) {
-            //todo реализовать загрузку на сервер файла
             String strFile = fileListClient.getSelectedValue();
             System.out.println(strFile);
-            onSendFileOnServer(strFile);
-        }
-        else {
+            fileUploadOnServer(strFile);
+        } else if (event == btnDownloadToLocal) {
+            String strFile = fileListServer.getSelectedValue();
+            fileDownloadOnLocal(strFile);
+            System.out.println(strFile);
+        } else {
             throw new RuntimeException("Обработай событие, ты про него забыл");
         }
-
     }
 
     private void updateClientFiles() {
@@ -171,6 +173,14 @@ public class ClientGUI extends JFrame implements Thread.UncaughtExceptionHandler
     public void onServerListFiles(ListMessage listMessage) {
         String[] listFiles = listMessage.getListFiles().toArray(String[]::new);
         updateListFiles(fileListServer, listFiles);
+    }
+
+    @Override
+    public void onDownloadFileOnLocal(FileMessage fileMessage) {
+        clientController.addFile(fileMessage);
+        updateClientFiles();
+        JOptionPane.showMessageDialog(null,fileMessage.getFileTitle() + " Файл скачан");
+
     }
 
     @Override
@@ -199,31 +209,16 @@ public class ClientGUI extends JFrame implements Thread.UncaughtExceptionHandler
     }
 
     @Override
-    public void onSendFileOnServer(String strFile) {
+    public void fileUploadOnServer(String strFile) {
         clientController.sendFileOnServer(strFile);
+
     }
 
-
-//        if (message instanceof FileMessage) {
-//        }
-//        }
-//            FileMessage file = (FileMessage) message;
-//            if (file.getNum() == 1) {
-//                Files.write(
-//                        clientPath.resolve(file.getFileName()),
-//                        file.getBytes(),
-//                        StandardOpenOption.CREATE_NEW
-//                );
-//            } else {
-//                Files.write(
-//                        clientPath.resolve(file.getFileName()),
-//                        file.getBytes(),
-//                        StandardOpenOption.APPEND
-//                );
-//            }
-//            if (file.isFinish()) {
-//                updateClientView();
-//            }
+    @Override
+    public void fileDownloadOnLocal(String strFile) {
+        clientController.sendFileOnLocal(strFile);
+        updateClientFiles();
+    }
 }
 
 

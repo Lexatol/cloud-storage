@@ -32,6 +32,18 @@ public class ClientController implements ClientNetworkListener {
         }
     }
 
+    public void addFile(FileMessage fileMessage) {
+
+        FileMessage fl = fileMessage;
+        System.out.println("ClientController: пришло сообщение сохранить файл " + fl.getFileTitle());
+        Path path = Paths.get(DIR, CLIENTFILEDIR, fl.getFileTitle());
+        try {
+            Files.write(path, fl.getData());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public void renameFile(String lastTitleFile, String newTitleFile, StatePlace statePlace) {
         Path sourcePath;
         Path destinationPath = Paths.get(DIR, CLIENTFILEDIR, newTitleFile);
@@ -111,7 +123,6 @@ public class ClientController implements ClientNetworkListener {
         }
     }
 
-
     public void sendFileOnServer(String strFile) {
         Path path = Paths.get(DIR, CLIENTFILEDIR, strFile);
         try {
@@ -120,4 +131,9 @@ public class ClientController implements ClientNetworkListener {
             throw new RuntimeException(e);
         }
     }
+
+    public void sendFileOnLocal(String strFile) {
+        send(new FileRequest(strFile, State.SEND_FILE_REQUEST));
+    }
+
 }

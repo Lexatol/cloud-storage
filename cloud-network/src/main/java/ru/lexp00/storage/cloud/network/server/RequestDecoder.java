@@ -81,7 +81,15 @@ public class RequestDecoder extends ReplayingDecoder<Message> {//inbound
             fileMessage.setFileTitle(fileTitle);
             fileMessage.setData(data);
             out.add(fileMessage);
+        } else if (state == 7) {
+            System.out.println("Server decoder: Пришло сообщение от клиента с запросом на скачивание файла с сервера");
+            int fileTitleLength = in.readInt();
+            String fileTitle = in.readCharSequence(fileTitleLength, charset).toString();
+            FileRequest fileRequest = new FileRequest(fileTitle, State.SEND_FILE_REQUEST);
+            out.add(fileRequest);
+            System.out.println("Server decoder: decoder отправил запрос в Server Handler");
         }
+
     }
 }
 

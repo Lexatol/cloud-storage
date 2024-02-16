@@ -9,6 +9,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.stream.Stream;
 
 public class ProcessingHandler extends ChannelInboundHandlerAdapter {
 
@@ -93,15 +95,40 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter {
                 path = Paths.get(serverDir, serverFiles, strTitle);
                 Files.write(path, fileMessage.getData());
             } else {
-                String[] str = strTitle.split(" ");
-                path = Paths.get(serverDir, serverFiles, str[1]);
-                Files.createDirectory(path);
+                //todo добавить копирование папок
+
+//                String[] str = strTitle.split(" ");
+//                Path rootPath = Paths.get(serverDir, serverFiles, str[1]);
+//                try {
+//                    Files.walkFileTree(rootPath, new SimpleFileVisitor<Path>() {
+//                        @Override
+//                        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+//                            System.out.println("delete file: " + file.toString());
+//                            Files.createDirectory(file);
+//                            return FileVisitResult.CONTINUE;
+//                        }
+//
+//                        @Override
+//                        public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+//                            Files.createDirectory(dir);
+//                            System.out.println("delete dir: " + dir.toString());
+//                            return FileVisitResult.CONTINUE;
+//                        }
+//
+//                    });
+//                } catch(IOException e){
+//                    e.printStackTrace();
+//            }
             }
             sendMessageWithListFilesOnServer(ctx);
-
-
+        } else if (msg instanceof FileRequest) {
+            FileRequest fileRequest = (FileRequest) msg;
+            String strFile = fileRequest.getStrFile();
+            Path path = Paths.get(serverDir, serverFiles, strFile);
+            FileMessage fileMessage = new FileMessage(path, State.SEND_FILE);
+            ctx.writeAndFlush(fileMessage);
+            System.out.println("Server Handler: отправил запрос в Server Encoder");
         }
-
     }
 
     @Override
