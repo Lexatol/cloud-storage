@@ -7,7 +7,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 
 public class ServerNetwork {
-    private int port;
+    private final int port;
     private ChannelFuture channelFuture;
     private final ServerListener serverListener;
 
@@ -25,8 +25,7 @@ public class ServerNetwork {
                     .channel(NioServerSocketChannel.class)
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
-                        public void initChannel(SocketChannel ch)
-                                throws Exception {
+                        public void initChannel(SocketChannel ch) {
                             ch.pipeline().addLast(
                                     new RequestDecoder(serverListener),
                                     new ResponseDataEncoder(serverListener),

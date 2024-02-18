@@ -1,7 +1,6 @@
 package ru.lexp00.storage.cloud.network.client;
 
 
-
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -16,7 +15,7 @@ public class ClientNetwork extends Thread {
     private final int port;
 
     private ChannelFuture channelFuture;
-    private ClientListener clientListener;
+    private final ClientListener clientListener;
 
     public ClientNetwork(String host, int port, ClientListener clientListener) {
         this.clientListener = clientListener;
@@ -37,8 +36,7 @@ public class ClientNetwork extends Thread {
             b.handler(new ChannelInitializer<SocketChannel>() {
 
                 @Override
-                public void initChannel(SocketChannel ch)
-                        throws Exception {
+                public void initChannel(SocketChannel ch) {
                     ch.pipeline().addLast(
                             new ResponseDataEncoder(clientListener),
                             new RequestDecoder(clientListener),
@@ -55,11 +53,6 @@ public class ClientNetwork extends Thread {
             workerGroup.shutdownGracefully();
         }
 
-    }
-
-    public void close() {
-        channelFuture.channel().close();
-        channelFuture.addListener(ChannelFutureListener.CLOSE);
     }
 
     public void sendMessage(Message msg) {

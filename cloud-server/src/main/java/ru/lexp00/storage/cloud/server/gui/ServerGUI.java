@@ -19,30 +19,30 @@ public class ServerGUI extends JFrame implements Thread.UncaughtExceptionHandler
     private final JPanel panelInfoServer = new JPanel(new GridLayout(1, 3));
 
     private final JPanel panelStartStop = new JPanel(new GridLayout(1, 2));
-    private JButton buttonStart = new JButton("Start");
-    private JButton buttonStop = new JButton("Stop");
+    private final JButton buttonStart = new JButton("Start");
+    private final JButton buttonStop = new JButton("Stop");
 
 
     private final JPanel topServerName = new JPanel(new GridLayout(2, 1));
     private final JPanel topServerIP = new JPanel(new GridLayout(2, 1));
-    private JLabel serverLabelName = new JLabel("Server name: ");
-    private JLabel serverName = new JLabel("localhost");
-    private JLabel serverPortLabel = new JLabel("Server Port: ");
-    private JLabel serverPort = new JLabel("8189");
+    private final JLabel serverLabelName = new JLabel("Server name: ");
+    private final JLabel serverName = new JLabel("localhost");
+    private final JLabel serverPortLabel = new JLabel("Server Port: ");
+    private final JLabel serverPort = new JLabel("8189");
 
-    private JPanel panelStatusServer = new JPanel(new GridLayout(2, 1));
-    private JLabel serverStatusLabel = new JLabel("Status: ");
-    private JLabel serverStatus = new JLabel("Stopped");
+    private final JPanel panelStatusServer = new JPanel(new GridLayout(2, 1));
+    private final JLabel serverStatusLabel = new JLabel("Status: ");
+    private final JLabel serverStatus = new JLabel("Stopped");
 
-    private JMenuBar menuBar = new JMenuBar();
-    private JMenu menuFile = new JMenu("File");
-    private JMenuItem menuItemExit = new JMenuItem("Exit");
+    private final JMenuBar menuBar = new JMenuBar();
+    private final JMenu menuFile = new JMenu("File");
+    private final JMenuItem menuItemExit = new JMenuItem("Exit");
 
-    private JTextArea log = new JTextArea();
+    private final JTextArea log = new JTextArea();
 
-    private JLabel production = new JLabel("Production is Alexey Prikhodko");
+    private final JLabel production = new JLabel("Production is Alexey Prikhodko");
 
-    private Server server = new Server(serverName.getText(), Integer.parseInt(serverPort.getText()), this);
+    private final Server server = new Server(serverName.getText(), Integer.parseInt(serverPort.getText()), this);
 
     public ServerGUI() {
         initFrame();

@@ -14,7 +14,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
-import java.nio.file.Path;
 
 public class StorageClientGUI extends JFrame implements Thread.UncaughtExceptionHandler,
         ActionListener, ClientListener, ClientGUIListener {
@@ -25,41 +24,37 @@ public class StorageClientGUI extends JFrame implements Thread.UncaughtException
     private final int WITHPANELFILE = WITH / 2 - 10;
 
 
-    private JPanel panelBottom = new JPanel(new BorderLayout());
-    private JPanel panelLeft = new JPanel(new BorderLayout());
-    private JPanel panelRight = new JPanel(new BorderLayout());
-    private JPanel panelNorth = new JPanel(new GridLayout(1, 1));
-    private JPanel panelSouth = new JPanel(new GridLayout(2, 2));
-    private JPanel panelCenter = new JPanel(new GridLayout(10, 1));
-    private JList<String> fileListClient = new JList<>();
-    private JList<String> fileListServer = new JList<>();
-    private JLabel pathFolderLeft = new JLabel("Local files");
-    private JLabel pathFolderRight = new JLabel("Server files");
+    private final JPanel panelBottom = new JPanel(new BorderLayout());
+    private final JPanel panelLeft = new JPanel(new BorderLayout());
+    private final JPanel panelRight = new JPanel(new BorderLayout());
+    private final JPanel panelNorth = new JPanel(new GridLayout(1, 1));
+    private final JPanel panelSouth = new JPanel(new GridLayout(2, 2));
+    private final JPanel panelCenter = new JPanel(new GridLayout(10, 1));
+    private final JList<String> fileListClient = new JList<>();
+    private final JList<String> fileListServer = new JList<>();
+    private final JLabel pathFolderLeft = new JLabel("Local files");
+    private final JLabel pathFolderRight = new JLabel("Server files");
 
-    private JMenuBar menuBar = new JMenuBar();
-    private JMenu menuFile = new JMenu("Файл");
-    private JMenu menuNetwork = new JMenu("Сеть");
+    private final JMenuBar menuBar = new JMenuBar();
+    private final JMenu menuFile = new JMenu("Файл");
 
-    private JMenuItem menuFileItemAddCloud = new JMenuItem("Добавить...");
-    private JMenuItem menuFileItemExit = new JMenuItem("Выход");
-    private JButton btnRenameLocalFile = new JButton("Rename local File");
-    private JButton btnCreateLocalFolder = new JButton("Create Local Folder");
-    private JButton btnUploadToServer = new JButton("Upload to Server");
-    private JButton btnLocalDelete = new JButton("Local Delete");
-    private JButton btnRenameServerFile = new JButton("Rename Server File");
-    private JButton btnCreateServerFolder = new JButton("Create Server Folder");
-    private JButton btnDownloadToLocal = new JButton("Download to Local");
-    private JButton btnServerDelete = new JButton("Server Delete");
+    private final JMenuItem menuFileItemAddCloud = new JMenuItem("Добавить...");
+    private final JMenuItem menuFileItemExit = new JMenuItem("Выход");
+    private final JButton btnRenameLocalFile = new JButton("Rename local File");
+    private final JButton btnCreateLocalFolder = new JButton("Create Local Folder");
+    private final JButton btnUploadToServer = new JButton("Upload to Server");
+    private final JButton btnLocalDelete = new JButton("Local Delete");
+    private final JButton btnRenameServerFile = new JButton("Rename Server File");
+    private final JButton btnCreateServerFolder = new JButton("Create Server Folder");
+    private final JButton btnDownloadToLocal = new JButton("Download to Local");
+    private final JButton btnServerDelete = new JButton("Server Delete");
 
 
     private final ClientController clientController;
 
-    private final Path clientPath;
-
     public StorageClientGUI() {
         initFrame();
         clientController = new ClientController();
-        clientPath = clientController.getClientPath();
         updateClientFiles();
     }
 

@@ -1,7 +1,7 @@
 package ru.lexp00.storage.cloud.network.common;
 
 public class DirMessage extends Message{
-    private String titleDir;
+    private final String titleDir;
     public DirMessage(String titleDir, State state) {
         super(state);
         this.titleDir = titleDir;

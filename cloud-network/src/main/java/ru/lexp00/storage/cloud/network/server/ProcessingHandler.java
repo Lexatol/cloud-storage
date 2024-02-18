@@ -92,13 +92,13 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         serverListener.onServerException(cause.getMessage());
         ctx.close();
     }
 
     private void sendMessageWithListFilesOnServer(ChannelHandlerContext ctx) {
-        ListMessage listMessage = null;
+        ListMessage listMessage;
         Path serverPath = Paths.get(serverDir, serverFiles);
         try {
             listMessage = new ListMessage(serverPath, State.SEND_LIST_FILES);

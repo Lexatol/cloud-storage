@@ -13,7 +13,7 @@ import java.util.List;
 public class RequestDecoder
         extends ReplayingDecoder<Message> {
 
-    private Charset charset = StandardCharsets.UTF_8;
+    private final Charset charset = StandardCharsets.UTF_8;
     private final ClientListener clientListener;
 
     public RequestDecoder(ClientListener clientListener) {
@@ -21,7 +21,7 @@ public class RequestDecoder
     }
 
     @Override
-    protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
+    protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) {
         int state = in.readInt();
         if (state == 2 || state == 3) {
             ListMessage listMessage = new ListMessage(State.SEND_LIST_FILES);
@@ -51,7 +51,7 @@ public class RequestDecoder
     }
 
     @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         clientListener.onClientException(cause.getMessage());
     }
 

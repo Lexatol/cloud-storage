@@ -15,10 +15,9 @@ public class ClientNetworkHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+    public void channelRead(ChannelHandlerContext ctx, Object msg) {
         if (msg instanceof ListMessage) {
             ListMessage listMessage = (ListMessage) msg;
-            System.out.println(listMessage.getListFiles().toString());
             clientListener.onServerListFiles(listMessage);
         } else if (msg instanceof FileMessage) {
             FileMessage fileMessage = (FileMessage) msg;
@@ -29,7 +28,7 @@ public class ClientNetworkHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         clientListener.onClientException(cause.getMessage());
         ctx.close();
 

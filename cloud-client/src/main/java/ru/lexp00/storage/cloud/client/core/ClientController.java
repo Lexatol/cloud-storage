@@ -76,7 +76,7 @@ public class ClientController implements ClientNetworkListener {
     }
 
     public String[] updateClientFiles() {
-        String[] listFiles = new String[0];
+        String[] listFiles;
         try {
             listFiles = Files.list(clientPath)
                     .map(p -> {
@@ -102,10 +102,6 @@ public class ClientController implements ClientNetworkListener {
     public void updateListFiles(JList<String> fileList, String[] listFiles) {
         fileList.removeAll();
         fileList.setListData(listFiles);
-    }
-
-    public Path getClientPath() {
-        return clientPath;
     }
 
     public void deleteFile(String strTitle, StatePlace statePlace) throws IOException {

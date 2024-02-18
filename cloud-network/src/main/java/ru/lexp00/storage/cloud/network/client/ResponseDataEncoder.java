@@ -10,7 +10,7 @@ import java.nio.charset.StandardCharsets;
 
 public class ResponseDataEncoder
         extends MessageToByteEncoder<Message> {
-    private Charset charset = StandardCharsets.UTF_8;
+    private final Charset charset = StandardCharsets.UTF_8;
 
     private final ClientListener clientListener;
 
@@ -19,7 +19,7 @@ public class ResponseDataEncoder
     }
 
     @Override
-    protected void encode(ChannelHandlerContext ctx, Message msg, ByteBuf out) throws Exception {
+    protected void encode(ChannelHandlerContext ctx, Message msg, ByteBuf out) {
         int state = msg.getState().getTitle();
         out.writeInt(state);
         if (msg instanceof DirMessage) {
@@ -60,7 +60,7 @@ public class ResponseDataEncoder
     }
 
     @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause){
         clientListener.onClientException(cause.getMessage());
     }
 }
