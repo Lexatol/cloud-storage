@@ -1,5 +1,6 @@
 package ru.lexp00.storage.cloud.server.gui;
 
+import ru.lexp00.storage.cloud.network.server.ServerListener;
 import ru.lexp00.storage.cloud.server.core.Server;
 
 import javax.swing.*;
@@ -7,42 +8,41 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class ServerGUI extends JFrame implements Thread.UncaughtExceptionHandler, ActionListener {
+public class ServerGUI extends JFrame implements Thread.UncaughtExceptionHandler, ActionListener, ServerListener {
     private final int POS_X = 100;
     private final int POS_Y = 50;
     private final int WITH = 800;
     private final int HEIGHT = 600;
 
-    private final JPanel panelBottom = new JPanel(new BorderLayout());//общая панель (разметка экрана)
-    private final JPanel top = new JPanel(new GridLayout(2, 1));//верхняя панель
-    private final JPanel panelInfoServer = new JPanel(new GridLayout(1, 3)); //панель с информацией по серверу - наименование, порт, статус
+    private final JPanel panelBottom = new JPanel(new BorderLayout());
+    private final JPanel top = new JPanel(new GridLayout(2, 1));
+    private final JPanel panelInfoServer = new JPanel(new GridLayout(1, 3));
 
-    private final JPanel panelStartStop = new JPanel(new GridLayout(1, 2));//панель включения/отключения сервера
+    private final JPanel panelStartStop = new JPanel(new GridLayout(1, 2));
     private JButton buttonStart = new JButton("Start");
     private JButton buttonStop = new JButton("Stop");
 
 
-    private final JPanel topServerName = new JPanel(new GridLayout(2, 1));//панель имени сервера
-    private final JPanel topServerIP = new JPanel(new GridLayout(2, 1));//панель ip сервера
+    private final JPanel topServerName = new JPanel(new GridLayout(2, 1));
+    private final JPanel topServerIP = new JPanel(new GridLayout(2, 1));
     private JLabel serverLabelName = new JLabel("Server name: ");
     private JLabel serverName = new JLabel("localhost");
     private JLabel serverPortLabel = new JLabel("Server Port: ");
     private JLabel serverPort = new JLabel("8189");
 
-    private JPanel panelStatusServer = new JPanel(new GridLayout(2, 1));//панель статуса сервера
+    private JPanel panelStatusServer = new JPanel(new GridLayout(2, 1));
     private JLabel serverStatusLabel = new JLabel("Status: ");
     private JLabel serverStatus = new JLabel("Stopped");
 
-    private JMenuBar menuBar = new JMenuBar(); //общее меню
-    private JMenu menuFile = new JMenu("File"); //меню File
-    private JMenuItem menuItemNew = new JMenuItem("New server"); //кнопка меню файл
-    private JMenuItem menuItemExit = new JMenuItem("Exit");//кнопка меню файль
+    private JMenuBar menuBar = new JMenuBar();
+    private JMenu menuFile = new JMenu("File");
+    private JMenuItem menuItemExit = new JMenuItem("Exit");
 
     private JTextArea log = new JTextArea();
 
     private JLabel production = new JLabel("Production is Alexey Prikhodko");
 
-    private Server server = new Server(serverName.getText(), Integer.parseInt(serverPort.getText()));
+    private Server server = new Server(serverName.getText(), Integer.parseInt(serverPort.getText()), this);
 
     public ServerGUI() {
         initFrame();
@@ -73,11 +73,9 @@ public class ServerGUI extends JFrame implements Thread.UncaughtExceptionHandler
         panelInfoServer.add(panelStatusServer);
         panelInfoServer.add(panelStartStop);
 
-        menuFile.add(menuItemNew);
         menuFile.add(menuItemExit);
         menuBar.add(menuFile);
 
-        menuItemNew.addActionListener(this);
         menuItemExit.addActionListener(this);
 
         log.setEditable(false);
@@ -108,14 +106,9 @@ public class ServerGUI extends JFrame implements Thread.UncaughtExceptionHandler
     @Override
     public void actionPerformed(ActionEvent e) {
         Object event = e.getSource();
-        if (event == menuItemExit) {
+        if (event == menuItemExit || event == buttonStop) {
+            server.stop();
             dispose();
-            System.out.println("Программа завершена");
-        } else if (event == menuItemNew) {
-
-            String str = "Вы создали новый сервер";
-            System.out.println(str);
-            putLog(str);
         } else if (event == buttonStart) {
             new Thread(()-> {
                     try {
@@ -124,12 +117,7 @@ public class ServerGUI extends JFrame implements Thread.UncaughtExceptionHandler
                         throw new RuntimeException(ex);
                     }
                 }).start();
-            putLog("Сервер " + serverName.getText() + " запустился");
-        } else if (event == buttonStop) {
-            server.stop();
-            putLog("Сервер остановился");
         } else {
-            putLog("Обработай событие, ты про него забыл");
             throw new RuntimeException("Обработай событие, ты про него забыл");
         }
     }
@@ -137,5 +125,28 @@ public class ServerGUI extends JFrame implements Thread.UncaughtExceptionHandler
     public void putLog(String msg) {
         log.append(msg + "\n");
         log.setCaretPosition(log.getDocument().getLength());
+    }
+
+    @Override
+    public void onServerRequest(String msg) {
+        putLog(msg);
+    }
+
+    @Override
+    public void onServerException(String cause) {
+        JOptionPane.showMessageDialog(null, cause, "Exception", JOptionPane.ERROR_MESSAGE);
+        putLog(cause);
+
+    }
+
+    @Override
+    public void onServerStopped(String msg) {
+        putLog(msg);
+    }
+
+    @Override
+    public void onServerStarted(String msg) {
+        putLog("Сервер " + serverName.getText() + " запустился");
+
     }
 }

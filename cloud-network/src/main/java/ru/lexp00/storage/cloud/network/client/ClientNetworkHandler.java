@@ -8,15 +8,10 @@ import ru.lexp00.storage.cloud.network.common.ListMessage;
 
 public class ClientNetworkHandler extends ChannelInboundHandlerAdapter {
 
-    private final ClientNetworkListHandler clientNetworkListHandler;
+    private final ClientListener clientListener;
 
-    public ClientNetworkHandler(ClientNetworkListHandler clientNetworkListHandler) {
-        this.clientNetworkListHandler = clientNetworkListHandler;
-    }
-
-    @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        System.out.println("Активирован ClientNetworkHandler");
+    public ClientNetworkHandler(ClientListener clientListener) {
+        this.clientListener = clientListener;
     }
 
     @Override
@@ -24,19 +19,20 @@ public class ClientNetworkHandler extends ChannelInboundHandlerAdapter {
         if (msg instanceof ListMessage) {
             ListMessage listMessage = (ListMessage) msg;
             System.out.println(listMessage.getListFiles().toString());
-            clientNetworkListHandler.onServerListFiles(listMessage);
+            clientListener.onServerListFiles(listMessage);
         } else if (msg instanceof FileMessage) {
             FileMessage fileMessage = (FileMessage) msg;
-            clientNetworkListHandler.onDownloadFileOnLocal(fileMessage);
+            clientListener.onDownloadFileOnLocal(fileMessage);
         } else {
-            throw new RuntimeException("ClientNetworkHandler: Не известный тип сообщения " + msg.getClass().getCanonicalName());
+            clientListener.onClientException("ClientNetworkHandler: Не известный тип сообщения " + msg.getClass().getCanonicalName());
         }
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        cause.printStackTrace();
+        clientListener.onClientException(cause.getMessage());
         ctx.close();
+
     }
 
 }

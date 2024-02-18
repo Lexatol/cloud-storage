@@ -3,7 +3,7 @@ package ru.lexp00.storage.cloud.client.gui.frames;
 import ru.lexp00.storage.cloud.client.network.ClientNetworkListener;
 import ru.lexp00.storage.cloud.client.network.StorageClientNetwork;
 import ru.lexp00.storage.cloud.network.client.ClientNetwork;
-import ru.lexp00.storage.cloud.network.client.ClientNetworkListHandler;
+import ru.lexp00.storage.cloud.network.client.ClientListener;
 
 import javax.swing.*;
 import java.awt.*;
@@ -29,12 +29,12 @@ public class FrameAddServer extends JFrame implements ActionListener, Thread.Unc
 
     private ClientNetwork clientNetwork;
 
-    private ClientNetworkListener clientListener;
-    private ClientNetworkListHandler clientNetworkListHandler;
+    private ClientNetworkListener clientNetworkListener;
+    private ClientListener clientListener;
 
-    public FrameAddServer(ClientNetworkListener clientListener, ClientNetworkListHandler clientNetworkListHandler) {
+    public FrameAddServer(ClientNetworkListener clientNetworkListener, ClientListener clientListener) {
+        this.clientNetworkListener = clientNetworkListener;
         this.clientListener = clientListener;
-        this.clientNetworkListHandler = clientNetworkListHandler;
         initFrame();
     }
 
@@ -57,8 +57,8 @@ public class FrameAddServer extends JFrame implements ActionListener, Thread.Unc
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        clientNetwork = new StorageClientNetwork(serverHost.getText(), Integer.parseInt(serverPort.getText()), clientNetworkListHandler);
-        clientListener.clientOnConnect(clientNetwork);
+        clientNetwork = new StorageClientNetwork(serverHost.getText(), Integer.parseInt(serverPort.getText()), clientListener);
+        clientNetworkListener.clientOnConnect(clientNetwork);
         dispose();
     }
 

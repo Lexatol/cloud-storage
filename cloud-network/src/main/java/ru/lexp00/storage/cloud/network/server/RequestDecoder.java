@@ -12,16 +12,10 @@ import java.util.List;
 public class RequestDecoder extends ReplayingDecoder<Message> {
 
     private Charset charset = StandardCharsets.UTF_8;
+    private final ServerListener serverListener;
 
-    @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        System.out.println("Установлено соединение в RequestDecoder");
-    }
-
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        cause.printStackTrace();
-        ctx.close();
+    public RequestDecoder(ServerListener serverListener) {
+        this.serverListener = serverListener;
     }
 
     @Override
@@ -53,6 +47,8 @@ public class RequestDecoder extends ReplayingDecoder<Message> {
         } else if (state == 7) {
             String titleFile = getString(in);
             out.add(new FileRequest(titleFile, State.SEND_FILE_REQUEST));
+        } else {
+            serverListener.onServerException("ServerRequestDecoder: Не известный формат сообщения " + state);
         }
 
     }
@@ -60,6 +56,13 @@ public class RequestDecoder extends ReplayingDecoder<Message> {
     private String getString(ByteBuf in) {
         int titleLength = in.readInt();
         return in.readCharSequence(titleLength, charset).toString();
+    }
+
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        serverListener.onServerException(cause.getMessage());
+        ctx.close();
     }
 }
 

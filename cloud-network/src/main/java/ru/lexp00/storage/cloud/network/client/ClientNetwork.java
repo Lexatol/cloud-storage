@@ -16,10 +16,10 @@ public class ClientNetwork extends Thread {
     private final int port;
 
     private ChannelFuture channelFuture;
-    private ClientNetworkListHandler clientNetworkListHandler;
+    private ClientListener clientListener;
 
-    public ClientNetwork(String host, int port, ClientNetworkListHandler clientNetworkListHandler) {
-        this.clientNetworkListHandler = clientNetworkListHandler;
+    public ClientNetwork(String host, int port, ClientListener clientListener) {
+        this.clientListener = clientListener;
         this.host = host;
         this.port = port;
         start();
@@ -40,9 +40,9 @@ public class ClientNetwork extends Thread {
                 public void initChannel(SocketChannel ch)
                         throws Exception {
                     ch.pipeline().addLast(
-                            new ResponseDataEncoder(),
-                            new RequestDecoder(),
-                            new ClientNetworkHandler(clientNetworkListHandler)
+                            new ResponseDataEncoder(clientListener),
+                            new RequestDecoder(clientListener),
+                            new ClientNetworkHandler(clientListener)
                     );
                 }
             });

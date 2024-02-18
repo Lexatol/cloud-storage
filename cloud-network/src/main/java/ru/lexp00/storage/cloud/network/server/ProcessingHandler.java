@@ -8,36 +8,28 @@ import java.io.IOException;
 import java.nio.file.*;
 
 public class ProcessingHandler extends ChannelInboundHandlerAdapter {
-
+    private final ServerListener serverListener;
+    public ProcessingHandler(ServerListener serverListener) {
+        this.serverListener = serverListener;
+    }
 
     private final String prefixDir = "[DIR]";
     private final String splitDelimiter = " ";
-
     private final String serverDir = "./cloud-server";
-
     private final String serverFiles = "ServerFiles";
-    private final Path serverPath = Paths.get(serverDir, serverFiles);
-
-    @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        System.out.println("Сформировал путь к папке сервера");
-    }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws IOException {
-        System.out.println("В ProcessingHandler сервера прилетело сообщение " + msg.toString());
         if (msg instanceof ListRequest) {
             sendMessageWithListFilesOnServer(ctx);
 
         } else if (msg instanceof DirMessage) {
-            System.out.println("Прилетело сообщение из декодера о создании папки");
             String dirTitle = ((DirMessage) msg).getTitleDir();
             Path path = Paths.get(serverDir, serverFiles, dirTitle);
             if (!Files.exists(path)) {
                 Files.createDirectory(path);
-                System.out.println("Создали папку");
             } else {
-                System.out.println("Listener: папка с таким именем уже существует");
+                serverListener.onServerRequest("ServerListener: папка с таким именем уже существует");
             }
             sendMessageWithListFilesOnServer(ctx);
 
@@ -51,7 +43,7 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter {
                 try {
                     Files.move(sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING);
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    serverListener.onServerException(e.getMessage());
                 }
             }
             sendMessageWithListFilesOnServer(ctx);
@@ -60,14 +52,13 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter {
             String titleFile = deleteMessage.getTitleFile();
             Path path;
             path = getPath(titleFile);
-            if (!Files.exists(path)) {
+            if (Files.exists(path)) {
                 Files.delete(path);
             } else {
-                throw new RuntimeException("Такой файл не найден");
+                serverListener.onServerRequest("ServerProcessingHandler: Такой файл не найден");
             }
             sendMessageWithListFilesOnServer(ctx);
         } else if (msg instanceof FileMessage) {
-            System.out.println("Пришло сообщение с файлом из декодера");
             FileMessage fileMessage = (FileMessage) msg;
             String strTitle = fileMessage.getTitleFile();
             Path path;
@@ -75,7 +66,7 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter {
                 path = Paths.get(serverDir, serverFiles, strTitle);
                 Files.write(path, fileMessage.getDataFile());
             } else {
-                throw new RuntimeException("На данный момент не умеем копировать папки");
+                serverListener.onServerRequest("ServerProcessingHandler: На данный момент не умеем копировать папки");
             }
             sendMessageWithListFilesOnServer(ctx);
         } else if (msg instanceof FileRequest) {
@@ -85,7 +76,7 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter {
             FileMessage fileMessage = new FileMessage(path, State.SEND_FILE);
             ctx.writeAndFlush(fileMessage);
         } else {
-            throw new RuntimeException("Не известный формат сообщения " + msg.getClass().getCanonicalName());
+            serverListener.onServerException("ServerProcessingHandler: Не известный формат сообщения " + msg.getClass().getCanonicalName());
         }
     }
 
@@ -102,17 +93,18 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        cause.printStackTrace();
+        serverListener.onServerException(cause.getMessage());
         ctx.close();
     }
 
     private void sendMessageWithListFilesOnServer(ChannelHandlerContext ctx) {
         ListMessage listMessage = null;
+        Path serverPath = Paths.get(serverDir, serverFiles);
         try {
             listMessage = new ListMessage(serverPath, State.SEND_LIST_FILES);
             ctx.writeAndFlush(listMessage);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            serverListener.onServerException(e.getMessage());
         }
     }
 }

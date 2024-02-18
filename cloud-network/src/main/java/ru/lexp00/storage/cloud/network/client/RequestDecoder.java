@@ -14,6 +14,11 @@ public class RequestDecoder
         extends ReplayingDecoder<Message> {
 
     private Charset charset = StandardCharsets.UTF_8;
+    private final ClientListener clientListener;
+
+    public RequestDecoder(ClientListener clientListener) {
+        this.clientListener = clientListener;
+    }
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
@@ -26,7 +31,6 @@ public class RequestDecoder
                 int length = in.readInt();
                 arr.add(in.readCharSequence(length, Charset.defaultCharset()).toString());
             }
-            System.out.println(arr);
             listMessage.setListFiles(arr);
             out.add(listMessage);
         } else if (state == 6) {
@@ -42,13 +46,13 @@ public class RequestDecoder
             fileMessage.setDataFile(data);
             out.add(fileMessage);
         } else {
-            throw new RuntimeException("Client decoder: Пришел не известный код State: " + state);
+            clientListener.onClientException("Client decoder: Пришел не известный код State: " + state);
         }
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        cause.printStackTrace();
+        clientListener.onClientException(cause.getMessage());
     }
 
 

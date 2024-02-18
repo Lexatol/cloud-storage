@@ -14,7 +14,11 @@ public class ResponseDataEncoder
         extends MessageToByteEncoder<Message> {
 
     private Charset charset = StandardCharsets.UTF_8;
+    private final ServerListener serverListener;
 
+    public ResponseDataEncoder(ServerListener serverListener) {
+        this.serverListener = serverListener;
+    }
 
     @Override
     protected void encode(ChannelHandlerContext ctx,
@@ -26,29 +30,30 @@ public class ResponseDataEncoder
            int sizeListMessage = message.getListFiles().size();
            out.writeInt(sizeListMessage);
            for (int i = 0; i < sizeListMessage; i++) {
-               String str = message.getListFiles().get(i);
-               out.writeInt(str.length());
-               out.writeCharSequence(str, Charset.defaultCharset());
+               String titleFile = message.getListFiles().get(i);
+               outWriteTitle(out, titleFile.length(), titleFile);
            }
        } else if (msg instanceof FileMessage) {
            FileMessage fileMessage = (FileMessage) msg;
            String fileTitle = fileMessage.getTitleFile();
-           int fileTitleLength = fileTitle.length();
-           out.writeInt(fileTitleLength);
-           out.writeCharSequence(fileTitle, charset);
+           outWriteTitle(out, fileTitle.length(), fileTitle);
            byte[] data = fileMessage.getDataFile();
-           int listStringLength = data.length;
-           out.writeInt(listStringLength);
+           out.writeInt(data.length);
            out.writeBytes(data);
        }
        else {
-           throw new RuntimeException("Server Encoder: Не известный тип сообщения");
+          serverListener.onServerException("Server Encoder: Не известный тип сообщения");
        }
+    }
+
+    private void outWriteTitle(ByteBuf out, int fileTitleLength, String fileTitle) {
+        out.writeInt(fileTitleLength);
+        out.writeCharSequence(fileTitle, charset);
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        cause.printStackTrace();
+        serverListener.onServerException(cause.getMessage());
         ctx.close();
     }
 }

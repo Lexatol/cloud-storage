@@ -116,10 +116,12 @@ public class ClientController implements ClientNetworkListener {
         } else {
             path = Paths.get(dir, clientDir, strTitle);
         }
-        if (statePlace.equals(StatePlace.LOCAL_FOLDER)) {
+        if (statePlace.equals(StatePlace.LOCAL_FOLDER) && Files.exists(path)) {
             Files.delete(path);
-        } else if (statePlace.equals(StatePlace.SERVER_FOLDER)) {
+        } else if (statePlace.equals(StatePlace.SERVER_FOLDER) ) {
             send(new DeleteMessage(strTitle, State.SEND_DELETE_FILE));
+        } else {
+            throw new IOException("Такой файл не найден");
         }
     }
 

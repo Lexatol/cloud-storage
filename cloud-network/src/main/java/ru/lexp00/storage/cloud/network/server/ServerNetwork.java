@@ -9,9 +9,11 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 public class ServerNetwork {
     private int port;
     private ChannelFuture channelFuture;
+    private final ServerListener serverListener;
 
-    public ServerNetwork(int port) {
+    public ServerNetwork(int port, ServerListener serverListener) {
         this.port = port;
+        this.serverListener = serverListener;
     }
 
     public void run() throws Exception {
@@ -26,14 +28,15 @@ public class ServerNetwork {
                         public void initChannel(SocketChannel ch)
                                 throws Exception {
                             ch.pipeline().addLast(
-                                    new RequestDecoder(),
-                                    new ResponseDataEncoder(),
-                                    new ProcessingHandler());
+                                    new RequestDecoder(serverListener),
+                                    new ResponseDataEncoder(serverListener),
+                                    new ProcessingHandler(serverListener));
                         }
                     }).option(ChannelOption.SO_BACKLOG, 128)
                     .childOption(ChannelOption.SO_KEEPALIVE, true);
 
             channelFuture = b.bind(port).sync();
+            serverListener.onServerStarted("Server started");
             channelFuture.channel().closeFuture().sync();
         } finally {
             workerGroup.shutdownGracefully();
@@ -43,17 +46,17 @@ public class ServerNetwork {
 
     public void stop() {
         if (channelFuture.channel().isActive()) {
-            //todo сюда добавим пакет который отправим клиенту об отключении
+            serverListener.onServerStopped("Сервер остановился");
             try {
-                channelFuture.await(1000);//а это нам надо чтобы пакет успел улететь, иначе закроем раньше канал чем нужно
+                channelFuture.await(1000);
 
             } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                serverListener.onServerException(e.getMessage());
             }
             channelFuture.awaitUninterruptibly();
             channelFuture.addListener(ChannelFutureListener.CLOSE);
         } else {
-            System.out.println("Server is stopped");
+            serverListener.onServerRequest("Сервер уже остановлен");
         }
 
     }

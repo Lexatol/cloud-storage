@@ -6,7 +6,7 @@ import ru.lexp00.storage.cloud.client.core.StatePlace;
 import ru.lexp00.storage.cloud.client.gui.frames.FrameAddFolder;
 import ru.lexp00.storage.cloud.client.gui.frames.FrameAddServer;
 import ru.lexp00.storage.cloud.client.gui.frames.FrameRenameFile;
-import ru.lexp00.storage.cloud.network.client.ClientNetworkListHandler;
+import ru.lexp00.storage.cloud.network.client.ClientListener;
 import ru.lexp00.storage.cloud.network.common.FileMessage;
 import ru.lexp00.storage.cloud.network.common.ListMessage;
 
@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 public class StorageClientGUI extends JFrame implements Thread.UncaughtExceptionHandler,
-        ActionListener, ClientNetworkListHandler, ClientGUIListener {
+        ActionListener, ClientListener, ClientGUIListener {
     private final int POS_X = 30;
     private final int POS_Y = 30;
     private final int WITH = 800;
@@ -181,6 +181,11 @@ public class StorageClientGUI extends JFrame implements Thread.UncaughtException
         updateClientFiles();
         JOptionPane.showMessageDialog(null,"File download " + fileMessage.getTitleFile());
 
+    }
+
+    @Override
+    public void onClientException(String msg) {
+        JOptionPane.showMessageDialog(null, " Exception " + msg);
     }
 
     @Override
